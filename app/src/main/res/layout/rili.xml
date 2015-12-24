@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" 
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:background="#ffffff"
+	>
+<RelativeLayout 
+	android:orientation="vertical" 
+	android:layout_width="fill_parent"
+	android:layout_height="45dp"
+	android:background="#ffffff"
+	
+	>
+	
+<ImageView 
+    android:id="@+id/previous_year"
+     android:layout_width="wrap_content" 
+	 android:layout_height="45dp"
+	 android:onClick="previous_year"
+	 android:src="@drawable/previous_year"
+	 android:layout_alignParentLeft="true"
+	 android:paddingLeft="20dip"
+	 android:paddingRight="20dip"
+    />
+	<com.pwp.borderText.BorderText
+	    android:layout_width="wrap_content" 
+	    android:layout_height="45dp"
+        android:gravity="center"
+        android:id="@+id/toptext"
+        android:textSize="18sp"
+       android:layout_centerInParent="true"
+       
+	/>
+	<ImageView 
+    android:id="@+id/next_year"
+     android:layout_width="wrap_content" 
+	 android:layout_height="45dp"
+	 android:onClick="next_year"
+	 android:src="@drawable/next_year"
+	 android:layout_alignParentRight="true"
+	 android:paddingRight="20dip"
+	 android:paddingLeft="20dip"
+    />
+	
+	
+</RelativeLayout>
+<ViewFlipper android:id="@+id/flipper"
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content" 
+		/>
+<ListView 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/lv_schedule"
+    />
+</LinearLayout>
