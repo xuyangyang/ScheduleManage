@@ -46,8 +46,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
@@ -61,7 +59,7 @@ import com.pwp.vo.ScheduleVO;
  *
  */
 @SuppressLint("ResourceAsColor") 
-public class CalendarActivity extends Activity implements OnGestureListener,OnLongClickListener {
+public class CalendarActivity extends Activity implements OnGestureListener,OnItemClickListener,OnItemLongClickListener {
 
 	private ViewFlipper flipper = null;
 	private GestureDetector gestureDetector = null;
@@ -70,7 +68,6 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
 	private BorderText topText = null;
 	private ListView lV_schedule;
 	List< Map<String, Object>> itemList;
-//	private TextView foot_tv = null;
 	private Drawable draw = null;
 	private static int jumpMonth = 0;      //每次滑动，增加或减去一个月,默认为0（即显示当前月）
 	private static int jumpYear = 0;       //滑动跨越一年，则增加或者减去一年,默认为0(即当前年)
@@ -83,11 +80,11 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
 	private String[] scheduleIDs;
 	private  ArrayList<String> scheduleDate;
 	private Dialog builder;
-	private ScheduleVO scheduleVO_del;
-	int gvFlag = 0;  
+	private int gvFlag = 0;
 	static View ONCLICK_VIEW = null;
 	static boolean HAS_SCHEDULE = false;
-	SimpleAdapter mAdapter;
+	private SimpleAdapter mAdapter;
+    private int clickPosition = -1;
 	public CalendarActivity() {
 
 		Date date = new Date();
@@ -109,6 +106,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
 
         topText = (BorderText) findViewById(R.id.toptext);
         lV_schedule = (ListView)findViewById(R.id.lv_schedule);
+        lV_schedule.setOnItemLongClickListener(this);
 
         flipper.removeAllViews();
         calV = new CalendarViewAdapter(this, getResources(),jumpMonth,jumpYear,year_c,month_c,day_c);
@@ -118,7 +116,6 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
         flipper.addView(gridView,0);
 
         addTextToTopTextView(topText);
-//		foot_tv =(TextView) findViewById(R.id.foot_tv);
 	}
 
     @Override
@@ -127,17 +124,24 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
 
         itemList = new ArrayList<Map<String,Object>>();
         initDate();
-        mAdapter = new SimpleAdapter(this, itemList, R.layout.item_detail, new String[]{"time","shec"}, new int[]{R.id.tv_time,R.id.tv_shecudul});
+        mAdapter = new SimpleAdapter(this, itemList, R.layout.item_detail, new String[]{"id","time","shec"}, new int[]{R.id.tv_id,R.id.tv_time,R.id.tv_shecudul});
         lV_schedule.setAdapter(mAdapter);
     }
 
-	
 	public void initDate() {
 		 itemList.clear();
-		 scheduleIDs = dao.getScheduleByTagDate(year_c, month_c, day_c);
+        if(clickPosition == -1){
+            scheduleIDs = dao.getScheduleByTagDate(year_c, month_c, day_c);
+        }else{
+
+            String scheduleDay = calV.getDateByClickItem(clickPosition).split("\\.")[0];
+            String scheduleYear = calV.getShowYear();
+            String scheduleMonth = calV.getShowMonth();
+            scheduleIDs = dao.getScheduleByTagDate(Integer.parseInt(scheduleYear), Integer.parseInt(scheduleMonth), Integer.parseInt(scheduleDay));
+        }
+
          if(scheduleIDs != null && scheduleIDs.length > 0){
        	  HAS_SCHEDULE = true;
-       	System.out.println(scheduleIDs.length+"--------------len");
        	  //itemList = new ArrayList<Map<String,Object>>();
        	  ScheduleDAO dao=new ScheduleDAO(CalendarActivity.this);
     		 for (int i = 0; i < scheduleIDs.length; i++) {
@@ -145,20 +149,46 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
            	scheduleVO=dao.getScheduleByID(CalendarActivity.this,Integer.parseInt(scheduleIDs[i]));
     			Map<String, Object> map = new HashMap<String, Object>();
     			//System.out.println("------------test"+scheduleVO.getTime()+"-------"+scheduleVO.getScheduleContent());
+                map.put("id", scheduleVO.getScheduleID());
     			map.put("time", scheduleVO.getTime());
     			map.put("shec", scheduleVO.getScheduleTtile());
     			itemList.add(map);
     		}
-    		
-    		/* //mAdapter.notifyDataSetChanged();
-    		 mAdapter = new SimpleAdapter(CalendarActivity.this, itemList, R.layout.item_detail, new String[]{"time","shec"}, new int[]{R.id.tv_time,R.id.tv_shecudul});
-    		lV_schedule.setAdapter(mAdapter);*/
-    		 
-       	  
          }
-		 
-		 
+
 	}
+
+
+    //加载日程列表
+    public void getScheduleDateList(int year,int month,int date){
+        scheduleIDs = dao.getScheduleByTagDate(year, month, date);
+        if(scheduleIDs != null && scheduleIDs.length > 0){
+            HAS_SCHEDULE = true;
+            itemList.clear();
+
+            //itemList = new ArrayList<Map<String,Object>>();
+            ScheduleDAO dao=new ScheduleDAO(CalendarActivity.this);
+            for (int i = 0; i < scheduleIDs.length; i++) {
+
+                scheduleVO=dao.getScheduleByID(CalendarActivity.this,Integer.parseInt(scheduleIDs[i]));
+                Map<String, Object> map = new HashMap<String, Object>();
+                //System.out.println("------------test"+scheduleVO.getTime()+"-------"+scheduleVO.getScheduleContent());
+                map.put("id", scheduleVO.getScheduleID());
+                map.put("time", scheduleVO.getTime());
+                map.put("shec", scheduleVO.getScheduleTtile());
+                itemList.add(map);
+            }
+
+            mAdapter.notifyDataSetChanged();
+
+
+        }else{
+            //判断是否有日程安排
+            HAS_SCHEDULE = false;
+            itemList.clear();
+            mAdapter.notifyDataSetChanged();
+        }
+    }
 	
 	public void previous_year(View view) {
 		addGridView();   //添加一个gridView
@@ -426,6 +456,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
 				  int startPosition = calV.getStartPositon();
 				  int endPosition = calV.getEndPosition();
 				  if(startPosition <= position  && position <= endPosition){
+                      clickPosition = position;
 					  String scheduleDay = calV.getDateByClickItem(position).split("\\.")[0];  //这一天的阳历
 					  //String scheduleLunarDay = calV.getDateByClickItem(position).split("\\.")[1];  //这一天的阴历
 	                  String scheduleYear = calV.getShowYear();
@@ -453,38 +484,8 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
 							}
 						}
 					
-	                
-	                  
-	                  
 	                  //通过日期查询这一天是否被标记，如果标记了日程就查询出这天的所有日程信息
-	                  scheduleIDs = dao.getScheduleByTagDate(Integer.parseInt(scheduleYear), Integer.parseInt(scheduleMonth), Integer.parseInt(scheduleDay));
-	                  if(scheduleIDs != null && scheduleIDs.length > 0){
-	                	  HAS_SCHEDULE = true;
-	                	  itemList.clear();
-	                	  
-	                	  //itemList = new ArrayList<Map<String,Object>>();
-	                	  ScheduleDAO dao=new ScheduleDAO(CalendarActivity.this);
-	             		 for (int i = 0; i < scheduleIDs.length; i++) {
-	             			
-		                	scheduleVO=dao.getScheduleByID(CalendarActivity.this,Integer.parseInt(scheduleIDs[i]));
-	             			Map<String, Object> map = new HashMap<String, Object>();
-	             			//System.out.println("------------test"+scheduleVO.getTime()+"-------"+scheduleVO.getScheduleContent());
-	             			map.put("time", scheduleVO.getTime());
-	             			map.put("shec", scheduleVO.getScheduleTtile());
-	             			itemList.add(map);
-	             		}
-	             		
-	             		 mAdapter.notifyDataSetChanged();
-	             		/* mAdapter = new SimpleAdapter(CalendarActivity.this, itemList, R.layout.item_detail, new String[]{"time","shec"}, new int[]{R.id.tv_time,R.id.tv_shecudul});
-	             		lV_schedule.setAdapter(mAdapter);*/
-	             		 
-	                	  
-	                  }else{
-	                	  //判断是否有日程安排
-	                	  HAS_SCHEDULE = false;
-	                	  itemList.clear();
-	                	  mAdapter.notifyDataSetChanged();
-	                  }
+                      getScheduleDateList(Integer.parseInt(scheduleYear), Integer.parseInt(scheduleMonth), Integer.parseInt(scheduleDay));
 				  }
 			}
 		});
@@ -508,6 +509,8 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
 		});
 		gridView.setLayoutParams(params);
 	}
+
+
 	
 	
 	protected void getDateClick(int position){
@@ -571,33 +574,39 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnLo
 	}
 
 
-	
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
+    }
 
-	public boolean onLongClick(View v) {
-		scheduleVO_del=  (ScheduleVO) v.getTag();
-		Dialog alertDialog = new AlertDialog.Builder(CalendarActivity.this). 
-        setMessage("删除日程信息？"). 
-        setPositiveButton("确定", new DialogInterface.OnClickListener() { 
-             
-            public void onClick(DialogInterface dialog, int which) { 
-            	dao.delete(scheduleVO_del.getScheduleID());
-            	ScheduleViewActivity.setAlart(CalendarActivity.this);
-            	if(builder!=null&&builder.isShowing()){
-            		builder.dismiss();
-            	}
-            }
- 
-        }). 
-        setNegativeButton("取消", new DialogInterface.OnClickListener() { 
-             
-            public void onClick(DialogInterface dialog, int which) { 
-           	 
-            } 
-        }). 
-        create(); 
-		alertDialog.show();
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView,final View view, int i, long l) {
 
-		return false;
-	}
+        Dialog alertDialog = new AlertDialog.Builder(CalendarActivity.this).
+                setMessage("删除日程信息？").
+                setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        TextView id_tv=  (TextView) view.findViewById(R.id.tv_id);
+                        int scheduleID = Integer.parseInt(id_tv.getText().toString());
+                        dao.delete(scheduleID);
+                        mAdapter.notifyDataSetChanged();
+                        ScheduleViewActivity.setAlart(CalendarActivity.this);
+                        if(builder!=null&&builder.isShowing()){
+                            builder.dismiss();
+                        }
+                    }
+
+                }).
+                setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                }).
+                create();
+        alertDialog.show();
+
+        return false;
+    }
 }

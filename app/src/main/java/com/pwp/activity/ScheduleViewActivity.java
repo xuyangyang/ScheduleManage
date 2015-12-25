@@ -207,7 +207,7 @@ public class ScheduleViewActivity extends Activity {
 			finish();
 			//设置日程标记日期(将所有日程标记日期封装到list中)
 			setScheduleDateTag(remindID, scheduleYear, tempMonth, tempDay, scheduleID);
-			Toast.makeText(ScheduleViewActivity.this, "保存成功", 0).show();
+			Toast.makeText(ScheduleViewActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
 			
 			if (ISNOTIFY) {
 				setAlart(ScheduleViewActivity.this);
@@ -417,7 +417,9 @@ public class ScheduleViewActivity extends Activity {
 		String title =null ;
 		String content=null;
 		time=0;
-		
+		if(arrSch ==null){
+            return;
+        }
 		for (ScheduleVO vo : arrSch) {
 			if(vo.getAlartime()>mCalendar.getTimeInMillis()&&vo.getRemindID()==0){
 				if(time<mCalendar.getTimeInMillis()){
