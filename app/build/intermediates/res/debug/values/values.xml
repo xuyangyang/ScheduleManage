@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- From: file:/D:/androidspace/Schedule/app/src/main/res/values/color.xml -->
+    <!-- From: file:/C:/Users/acer-/ScheduleManage/app/src/main/res/values/color.xml -->
     <eat-comment/>
     <color name="basecolor">#2D99CA</color>
     <color name="black">#ff000000</color>
@@ -18,11 +18,11 @@
     <color name="red2">#ffff4500</color>
     <color name="red4">#ffdc143c</color>
     <color name="white">#ffffffff</color>
-    <!-- From: file:/D:/androidspace/Schedule/app/src/main/res/values/strings.xml -->
+    <!-- From: file:/C:/Users/acer-/ScheduleManage/app/src/main/res/values/strings.xml -->
     <eat-comment/>
     <string name="app_name">pwp日历</string>
     <string name="hello">Hello World, CalendarActivity!</string>
-    <!-- From: file:/D:/androidspace/Schedule/app/src/main/res/values/style.xml -->
+    <!-- From: file:/C:/Users/acer-/ScheduleManage/app/src/main/res/values/style.xml -->
     <eat-comment/>
     <style name="Titleground">
         <item name="android:background">@color/basecolor</item>

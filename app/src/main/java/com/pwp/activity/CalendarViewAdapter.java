@@ -64,10 +64,8 @@ public class CalendarViewAdapter extends BaseAdapter {
     private String sys_month = "";
     private String sys_day = "";
 
-    // 日程时间(需要标记的日程日期)
-    private String sch_year = "";
-    private String sch_month = "";
-    private String sch_day = "";
+
+    private View selectedGridView;
 
     public CalendarViewAdapter() {
         Date date = new Date();
@@ -189,7 +187,10 @@ public class CalendarViewAdapter extends BaseAdapter {
         if (position < daysOfMonth + dayOfWeek + 7 && position >= dayOfWeek + 7) {
             // 当前月信息显示
             textView.setTextColor(Color.BLACK);// 当月字体设黑
-            drawable = res.getDrawable(R.drawable.item);
+            if(d.equals(currentDay)){
+                CalendarActivity act = (CalendarActivity) context;
+                act.selectedGridView(currentDay,currentYear,currentMonth,convertView,position);
+            }
         }
         if (schDateTagFlag != null && schDateTagFlag.length > 0) {
             for (int i = 0; i < schDateTagFlag.length; i++) {
@@ -291,9 +292,6 @@ public class CalendarViewAdapter extends BaseAdapter {
 
     }
 
-    public void matchScheduleDate(int year, int month, int day) {
-
-    }
 
     /**
      * 点击每一个item时返回item中的日期

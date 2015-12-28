@@ -4,4 +4,4 @@
         android:duration="500" /> 
 <alpha android:fromAlpha="1.0" android:toAlpha="0.5"   
         android:duration="500" />             
-</set>  <!-- From: file:/D:/androidspace/Schedule/app/src/main/res/anim/push_left_out.xml -->
+</set>  <!-- From: file:/C:/Users/acer-/ScheduleManage/app/src/main/res/anim/push_left_out.xml -->

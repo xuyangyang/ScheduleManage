@@ -113,19 +113,19 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
         addGridView();
         gridView.setAdapter(calV);
         //flipper.addView(gridView);
-        flipper.addView(gridView,0);
+        flipper.addView(gridView, 0);
 
         addTextToTopTextView(topText);
+		itemList = new ArrayList<Map<String,Object>>();
+		mAdapter = new SimpleAdapter(this, itemList, R.layout.item_detail, new String[]{"id","time","shec"}, new int[]{R.id.tv_id,R.id.tv_time,R.id.tv_shecudul});
+		lV_schedule.setAdapter(mAdapter);
 	}
 
     @Override
     protected void onResume() {
         super.onResume();
+		initDate();
 
-        itemList = new ArrayList<Map<String,Object>>();
-        initDate();
-        mAdapter = new SimpleAdapter(this, itemList, R.layout.item_detail, new String[]{"id","time","shec"}, new int[]{R.id.tv_id,R.id.tv_time,R.id.tv_shecudul});
-        lV_schedule.setAdapter(mAdapter);
     }
 
 	public void initDate() {
@@ -342,16 +342,16 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 				        }
 				        flipper.removeViewAt(0);
 				        //跳转之后将跳转之后的日期设置为当期日期
-				        year_c = year;
+				        /*year_c = year;
 						month_c = monthOfYear+1;
-						day_c = dayOfMonth;
+						day_c = dayOfMonth;*/
 						jumpMonth = 0;
 						jumpYear = 0;
 
 					}
 				}
 			},year_c, month_c-1, day_c).show();
-        	break;
+			break;
         }
 		return super.onMenuItemSelected(featureId, item);
 	}
@@ -455,15 +455,13 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 				  int startPosition = calV.getStartPositon();
 				  int endPosition = calV.getEndPosition();
 				  if(startPosition <= position  && position <= endPosition){
-                      clickPosition = position;
+
 					  String scheduleDay = calV.getDateByClickItem(position).split("\\.")[0];  //这一天的阳历
 					  //String scheduleLunarDay = calV.getDateByClickItem(position).split("\\.")[1];  //这一天的阴历
 	                  String scheduleYear = calV.getShowYear();
 	                  String scheduleMonth = calV.getShowMonth();
-	                  selectedGridView(scheduleDay, scheduleYear, scheduleMonth, view);
-					
-	                  //通过日期查询这一天是否被标记，如果标记了日程就查询出这天的所有日程信息
-                      getScheduleDateList(Integer.parseInt(scheduleYear), Integer.parseInt(scheduleMonth), Integer.parseInt(scheduleDay));
+	                  selectedGridView(scheduleDay, scheduleYear, scheduleMonth, view, position);
+
 				  }
 			}
 		});
@@ -490,7 +488,8 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 
 
 	//gridview选中效果
-    public void selectedGridView(String scheduleDay,String scheduleYear,String scheduleMonth,View view){
+    public void selectedGridView(String scheduleDay,String scheduleYear,String scheduleMonth,View view,int position){
+		clickPosition = position;
         if (ONCLICK_VIEW==null) {
             if (scheduleDay.equals(String.valueOf(day_c))&&scheduleMonth.equals(String.valueOf(month_c))&&scheduleYear.equals(String.valueOf(year_c))) {
                 ONCLICK_VIEW = null;
@@ -501,7 +500,8 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 
         }else {
             if (HAS_SCHEDULE) {
-                ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.mark);
+                ONCLICK_VIEW.findViewById(R.id.bluepoint).setVisibility(View.VISIBLE);
+				ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.color.white);
             }else {
                 ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.color.white);
             }
@@ -512,6 +512,8 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
                 ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.select_bg);
             }
         }
+		//通过日期查询这一天是否被标记，如果标记了日程就查询出这天的所有日程信息
+		getScheduleDateList(Integer.parseInt(scheduleYear), Integer.parseInt(scheduleMonth), Integer.parseInt(scheduleDay));
     }
 	
 	protected void getDateClick(int position){

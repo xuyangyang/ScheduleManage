@@ -51,21 +51,20 @@ public final class R {
         public static final int item=0x7f02000d;
         public static final int jia=0x7f02000e;
         public static final int list_item_selected_bg=0x7f02000f;
-        public static final int mark=0x7f020010;
-        public static final int next_year=0x7f020011;
-        public static final int notebook=0x7f020012;
-        public static final int previous_year=0x7f020013;
-        public static final int schedule_bk=0x7f020014;
-        public static final int schedule_type=0x7f020015;
-        public static final int select_bg=0x7f020016;
-        public static final int split_1=0x7f020017;
-        public static final int split_left_1=0x7f020018;
-        public static final int split_right_1=0x7f020019;
-        public static final int tel_btn=0x7f02001a;
-        public static final int tixing_title=0x7f02001b;
-        public static final int top=0x7f02001c;
-        public static final int top_day=0x7f02001d;
-        public static final int week_top=0x7f02001e;
+        public static final int next_year=0x7f020010;
+        public static final int notebook=0x7f020011;
+        public static final int previous_year=0x7f020012;
+        public static final int schedule_bk=0x7f020013;
+        public static final int schedule_type=0x7f020014;
+        public static final int select_bg=0x7f020015;
+        public static final int split_1=0x7f020016;
+        public static final int split_left_1=0x7f020017;
+        public static final int split_right_1=0x7f020018;
+        public static final int tel_btn=0x7f020019;
+        public static final int tixing_title=0x7f02001a;
+        public static final int top=0x7f02001b;
+        public static final int top_day=0x7f02001c;
+        public static final int week_top=0x7f02001d;
     }
     public static final class id {
         public static final int bluepoint=0x7f080000;
@@ -110,14 +109,15 @@ public final class R {
     public static final class layout {
         public static final int calendar=0x7f030000;
         public static final int common_date=0x7f030001;
-        public static final int common_time=0x7f030002;
-        public static final int convert=0x7f030003;
-        public static final int item_detail=0x7f030004;
-        public static final int mydialog=0x7f030005;
-        public static final int rili=0x7f030006;
-        public static final int schedule=0x7f030007;
-        public static final int schedule_info=0x7f030008;
-        public static final int tixing=0x7f030009;
+        public static final int common_datetime=0x7f030002;
+        public static final int common_time=0x7f030003;
+        public static final int convert=0x7f030004;
+        public static final int item_detail=0x7f030005;
+        public static final int mydialog=0x7f030006;
+        public static final int rili=0x7f030007;
+        public static final int schedule=0x7f030008;
+        public static final int schedule_info=0x7f030009;
+        public static final int tixing=0x7f03000a;
     }
     public static final class string {
         public static final int app_name=0x7f060000;
