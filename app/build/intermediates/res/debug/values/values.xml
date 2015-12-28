@@ -2,6 +2,7 @@
 <resources>
     <!-- From: file:/D:/androidspace/Schedule/app/src/main/res/values/color.xml -->
     <eat-comment/>
+    <color name="basecolor">#2D99CA</color>
     <color name="black">#ff000000</color>
     <color name="blue">#ff36648b</color>
     <color name="dodgerblue">#ff1e90ff</color>
@@ -23,30 +24,10 @@
     <string name="hello">Hello World, CalendarActivity!</string>
     <!-- From: file:/D:/androidspace/Schedule/app/src/main/res/values/style.xml -->
     <eat-comment/>
-    <style name="FullScreenDialog" parent="android:style/Theme.Dialog"> 
-    <item name="android:windowNoTitle">true</item> 
-    <item name="android:windowFrame">@null</item> 
-    <item name="android:windowIsFloating">true</item> 
-    <item name="android:windowIsTranslucent">false</item> 
-    <item name="android:background">#00000000</item> 
-    <item name="android:windowBackground">@null</item> 
-    <item name="android:backgroundDimEnabled">false</item> 
-</style>
-    <style name="MyDialog" parent="android:style/Theme.Dialog">
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowNoTitle">true</item> 
-        <item name="android:windowIsTranslucent">false</item> 
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:backgroundDimEnabled">false</item> 
-        <item name="android:windowBackground"> @android:color/transparent </item>
+    <style name="Titleground">
+        <item name="android:background">@color/basecolor</item>
     </style>
-    <style name="dialog" parent="@android:style/Theme.Dialog"><!--name是我们在使用时要用到的资源的标志，parent是指当前的样式所继承的父类样式-->
-         <item name="android:windowFrame">@null</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowIsTranslucent">false</item>
-        <item name="android:windowNoTitle">true</item><!--隐藏标题栏-->
-        <item name="android:background">#00000000</item>
-        <item name="android:backgroundDimEnabled">false</item>
+    <style name="title_bg" parent="android:Theme">
+        <item name="android:windowTitleBackgroundStyle">@style/Titleground</item>
     </style>
 </resources>

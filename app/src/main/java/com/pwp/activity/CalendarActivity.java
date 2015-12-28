@@ -347,6 +347,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 						day_c = dayOfMonth;
 						jumpMonth = 0;
 						jumpYear = 0;
+
 					}
 				}
 			},year_c, month_c-1, day_c).show();
@@ -441,15 +442,13 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 				// TODO Auto-generated method stub
 				return CalendarActivity.this.gestureDetector
 						.onTouchEvent(event);
+
 			}
 		});
 
 		
 		gridView.setOnItemClickListener(new OnItemClickListener() {
-            //gridView中的每一个item的点击事件
-			
-			
-			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
 				 
 				  //点击任何一个item，得到这个item的日期(排除点击的是周日到周六(点击不响应))
@@ -461,28 +460,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 					  //String scheduleLunarDay = calV.getDateByClickItem(position).split("\\.")[1];  //这一天的阴历
 	                  String scheduleYear = calV.getShowYear();
 	                  String scheduleMonth = calV.getShowMonth();
-	                  
-						if (ONCLICK_VIEW==null) {
-							if (scheduleDay.equals(String.valueOf(day_c))&&scheduleMonth.equals(String.valueOf(month_c))&&scheduleYear.equals(String.valueOf(year_c))) {
-								ONCLICK_VIEW = null;
-							}else {
-								ONCLICK_VIEW = arg1;
-		    					ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.select_bg);
-							}
-	    					
-	    				}else {
-	    					if (HAS_SCHEDULE) {
-	    						ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.mark);
-							}else {
-								ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.color.white);
-							}
-	    					if (scheduleDay.equals(String.valueOf(day_c))&&scheduleMonth.equals(String.valueOf(month_c))&&scheduleYear.equals(String.valueOf(year_c))) {
-	    						ONCLICK_VIEW = null;
-							}else {
-							ONCLICK_VIEW = arg1;
-	    					ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.select_bg);
-							}
-						}
+	                  selectedGridView(scheduleDay, scheduleYear, scheduleMonth, view);
 					
 	                  //通过日期查询这一天是否被标记，如果标记了日程就查询出这天的所有日程信息
                       getScheduleDateList(Integer.parseInt(scheduleYear), Integer.parseInt(scheduleMonth), Integer.parseInt(scheduleDay));
@@ -511,7 +489,30 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 	}
 
 
-	
+	//gridview选中效果
+    public void selectedGridView(String scheduleDay,String scheduleYear,String scheduleMonth,View view){
+        if (ONCLICK_VIEW==null) {
+            if (scheduleDay.equals(String.valueOf(day_c))&&scheduleMonth.equals(String.valueOf(month_c))&&scheduleYear.equals(String.valueOf(year_c))) {
+                ONCLICK_VIEW = null;
+            }else {
+                ONCLICK_VIEW = view;
+                ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.select_bg);
+            }
+
+        }else {
+            if (HAS_SCHEDULE) {
+                ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.mark);
+            }else {
+                ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.color.white);
+            }
+            if (scheduleDay.equals(String.valueOf(day_c))&&scheduleMonth.equals(String.valueOf(month_c))&&scheduleYear.equals(String.valueOf(year_c))) {
+                ONCLICK_VIEW = null;
+            }else {
+                ONCLICK_VIEW = view;
+                ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.select_bg);
+            }
+        }
+    }
 	
 	protected void getDateClick(int position){
 		 //点击任何一个item，得到这个item的日期(排除点击的是周日到周六(点击不响应))

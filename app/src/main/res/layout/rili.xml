@@ -3,13 +3,33 @@
 	android:orientation="vertical" 
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:background="#ffffff"
+	android:background="@color/light_white"
 	>
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="45dp"
+        android:background="@color/basecolor"
+
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="45dp"
+            android:gravity="center"
+            android:id="@+id/scheduleTop"
+            android:textSize="18sp"
+            android:layout_centerInParent="true"
+            android:text="日程管理"
+            android:textColor="#ffffff"/>
+
+
+    </RelativeLayout>
 <RelativeLayout 
 	android:orientation="vertical" 
 	android:layout_width="fill_parent"
 	android:layout_height="45dp"
-	android:background="#ffffff"
+    android:background="#ffffff"
 	
 	>
 	
@@ -47,11 +67,13 @@
 </RelativeLayout>
 <ViewFlipper android:id="@+id/flipper"
 		android:layout_width="fill_parent" 
-		android:layout_height="wrap_content" 
-		/>
+		android:layout_height="wrap_content"
+        android:background="#ffffff"/>
 <ListView 
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
     android:id="@+id/lv_schedule"
+    android:background="#ffffff"
     />
 </LinearLayout>

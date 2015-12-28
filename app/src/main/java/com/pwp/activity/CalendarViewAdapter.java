@@ -39,7 +39,7 @@ public class CalendarViewAdapter extends BaseAdapter {
     private int lastDaysOfMonth = 0; // 上一个月的总天数
     private Context context;
     private String[] dayNumber = new String[49]; // 一个gridview中的日期存入此数组中
-    private static String week[] = { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
+    private static String week[] = { "日", "一", "二", "三", "四", "五", "六" };
     private SpecialCalendar sc = null;
     private LunarCalendar lc = null;
     private Resources res = null;
@@ -181,8 +181,8 @@ public class CalendarViewAdapter extends BaseAdapter {
         textView.setTextColor(Color.GRAY);
         if (position < 7) {
             // 设置周
-            textView.setTextColor(Color.BLACK);
-            drawable = res.getDrawable(R.drawable.week_top);
+            textView.setTextSize(15);
+//            drawable = res.getDrawable(R.drawable.week_top);
             textView.setBackgroundDrawable(drawable);
         }
 
@@ -190,15 +190,13 @@ public class CalendarViewAdapter extends BaseAdapter {
             // 当前月信息显示
             textView.setTextColor(Color.BLACK);// 当月字体设黑
             drawable = res.getDrawable(R.drawable.item);
-            // textView.setBackgroundDrawable(drawable);
-            // textView.setBackgroundColor(Color.WHITE);
-
         }
         if (schDateTagFlag != null && schDateTagFlag.length > 0) {
             for (int i = 0; i < schDateTagFlag.length; i++) {
                 if (schDateTagFlag[i] == position) {
                     // 设置日程标记背景
-                    textView.setBackgroundResource(R.drawable.mark);
+//                    textView.setBackgroundResource(R.drawable.mark);
+                    convertView.findViewById(R.id.bluepoint).setVisibility(View.VISIBLE);
                 }
             }
         }

@@ -8,12 +8,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.DatePicker;
 import android.widget.DatePicker.OnDateChangedListener;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.TimePicker.OnTimeChangedListener;
-import android.widget.Toast;
 
 /**
  * 日期时间选择控件 使用方法： private EditText inputDate;//需要设置的日期时间文本编辑框 private String
@@ -33,7 +31,8 @@ public class DateTimePickDialogUtil implements OnDateChangedListener,
 		OnTimeChangedListener {
 	private DatePicker datePicker;
 	private TimePicker timePicker;
-	private AlertDialog ad;
+	private AlertDialog dateAd;
+    private AlertDialog timeAd;
 	private String dateTime;
 	private String dateTag;
 	private String initDateTime;
@@ -84,22 +83,25 @@ public class DateTimePickDialogUtil implements OnDateChangedListener,
 	 * @return
 	 */
 	public AlertDialog dateTimePicKDialog(final TextView inputDate) {
-		LinearLayout dateTimeLayout = (LinearLayout) activity
-				.getLayoutInflater().inflate(R.layout.common_datetime, null);
-		datePicker = (DatePicker) dateTimeLayout.findViewById(R.id.datepicker);
-		timePicker = (TimePicker) dateTimeLayout.findViewById(R.id.timepicker);
+		LinearLayout dateLayout = (LinearLayout) activity
+				.getLayoutInflater().inflate(R.layout.common_date, null);
+       final LinearLayout timeLayout = (LinearLayout) activity
+                .getLayoutInflater().inflate(R.layout.common_time, null);
+		datePicker = (DatePicker) dateLayout.findViewById(R.id.datepicker);
+		timePicker = (TimePicker) timeLayout.findViewById(R.id.timepicker);
 		init(datePicker, timePicker);
 		timePicker.setIs24HourView(true);
 		timePicker.setOnTimeChangedListener(this);
 		System.out.println(initDateTime+"==================");
-		ad = new AlertDialog.Builder(activity)
+        dateAd = new AlertDialog.Builder(activity)
 				.setTitle(initDateTime)
-				.setView(dateTimeLayout)
-				.setPositiveButton("设置", new DialogInterface.OnClickListener() {
+				.setView(dateLayout)
+				.setPositiveButton("下一步", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
                         onDateChanged(null, 0, 0, 0);
 						inputDate.setText(dateTime);
 						inputDate.setTag(dateTag);
+                        timeAd.show();
 					}
 				})
 				.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -107,9 +109,23 @@ public class DateTimePickDialogUtil implements OnDateChangedListener,
 						//inputDate.setText("");
 					}
 				}).show();
-
+        timeAd = new AlertDialog.Builder(activity)
+                .setTitle(dateTime)
+                .setView(timeLayout)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        onDateChanged(null, 0, 0, 0);
+                        inputDate.setText(dateTime);
+                        inputDate.setTag(dateTag);
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dateAd.show();
+                    }
+                }).create();
 		onDateChanged(null, 0, 0, 0);
-		return ad;
+		return dateAd;
 	}
 
 
@@ -132,7 +148,7 @@ public class DateTimePickDialogUtil implements OnDateChangedListener,
 		dateTag = sdftag.format(calendar.getTime());
 		ScheduleViewActivity.hour = timePicker.getCurrentHour();
 		ScheduleViewActivity.minute = timePicker.getCurrentMinute();
-		ad.setTitle(dateTime);
+        dateAd.setTitle(dateTime);
 	}
 
 	/**

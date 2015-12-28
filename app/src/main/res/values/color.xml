@@ -15,4 +15,5 @@
     <color name="red4">#ffdc143c</color>
     <color name="dodgerblue">#ff1e90ff</color>
     <color name="nothing">#00000000</color>
+    <color name="basecolor">#2D99CA</color>
 </resources>
