@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="C:\Users\acer-\ScheduleManage\app\src\main\assets"><file name="fonts/Helvetica.ttf" path="C:\Users\acer-\ScheduleManage\app\src\main\assets\fonts\Helvetica.ttf"/></source></dataSet><dataSet config="debug"><source path="C:\Users\acer-\ScheduleManage\app\src\debug\assets"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="D:\androidspace\Schedule\app\src\main\assets"><file name="fonts/Helvetica.ttf" path="D:\androidspace\Schedule\app\src\main\assets\fonts\Helvetica.ttf"/></source></dataSet><dataSet config="debug"><source path="D:\androidspace\Schedule\app\src\debug\assets"/></dataSet></merger>

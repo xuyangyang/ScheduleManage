@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" 
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:background="@color/light_white"
-	>
+	android:background="@color/light_white">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
     <RelativeLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
@@ -69,11 +71,12 @@
 		android:layout_width="fill_parent" 
 		android:layout_height="wrap_content"
         android:background="#ffffff"/>
-<ListView 
+<com.pwp.view.ListViewForScrollView
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="20dp"
     android:id="@+id/lv_schedule"
     android:background="#ffffff"
     />
-</LinearLayout><!-- From: file:/C:/Users/acer-/ScheduleManage/app/src/main/res/layout/rili.xml -->
+    </LinearLayout>
+</ScrollView><!-- From: file:/D:/androidspace/Schedule/app/src/main/res/layout/rili.xml -->

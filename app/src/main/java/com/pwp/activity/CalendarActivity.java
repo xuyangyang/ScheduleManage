@@ -22,6 +22,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
@@ -51,6 +54,8 @@ import android.widget.ViewFlipper;
 
 import com.pwp.borderText.BorderText;
 import com.pwp.dao.ScheduleDAO;
+import com.pwp.view.GridViewForScrollView;
+import com.pwp.view.ListViewForScrollView;
 import com.pwp.vo.ScheduleVO;
 
 /**
@@ -64,9 +69,9 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 	private ViewFlipper flipper = null;
 	private GestureDetector gestureDetector = null;
 	private CalendarViewAdapter calV = null;
-	private GridView gridView = null;
+	private GridViewForScrollView gridView = null;
 	private BorderText topText = null;
-	private ListView lV_schedule;
+	private ListViewForScrollView lV_schedule;
 	List< Map<String, Object>> itemList;
 	private Drawable draw = null;
 	private static int jumpMonth = 0;      //每次滑动，增加或减去一个月,默认为0（即显示当前月）
@@ -85,6 +90,10 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 	static boolean HAS_SCHEDULE = false;
 	private SimpleAdapter mAdapter;
     private int clickPosition = -1;
+    private int iScheduleDay = -1;
+    private int nodataSig = 0;
+    private int dataSig = 1;
+    private Message message;
 	public CalendarActivity() {
 
 		Date date = new Date();
@@ -105,7 +114,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
         flipper = (ViewFlipper) findViewById(R.id.flipper);
 
         topText = (BorderText) findViewById(R.id.toptext);
-        lV_schedule = (ListView)findViewById(R.id.lv_schedule);
+        lV_schedule = (ListViewForScrollView)findViewById(R.id.lv_schedule);
         lV_schedule.setOnItemLongClickListener(this);
 
         flipper.removeAllViews();
@@ -142,7 +151,6 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 
          if(scheduleIDs != null && scheduleIDs.length > 0){
        	  HAS_SCHEDULE = true;
-       	  //itemList = new ArrayList<Map<String,Object>>();
        	  ScheduleDAO dao=new ScheduleDAO(CalendarActivity.this);
     		 for (int i = 0; i < scheduleIDs.length; i++) {
     			
@@ -159,38 +167,65 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 	}
 
 
+
     //加载日程列表
-    public void getScheduleDateList(int year,int month,int date){
-        scheduleIDs = dao.getScheduleByTagDate(year, month, date);
-        if(scheduleIDs != null && scheduleIDs.length > 0){
-            HAS_SCHEDULE = true;
-            itemList.clear();
+    public synchronized void getScheduleDateList(final int year,final int month,final int date){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                message = new Message();
+                if (!Thread.currentThread().isInterrupted()) {
+                    Looper.prepare();
+                    Bundle b = new Bundle();
+                    scheduleIDs = dao.getScheduleByTagDate(year, month, date);
+                    if (scheduleIDs != null && scheduleIDs.length > 0) {
+                        HAS_SCHEDULE = true;
+                        message.what = dataSig;
 
-            //itemList = new ArrayList<Map<String,Object>>();
-            ScheduleDAO dao=new ScheduleDAO(CalendarActivity.this);
-            for (int i = 0; i < scheduleIDs.length; i++) {
+                    } else {
+                        HAS_SCHEDULE = false;
+                        message.what = nodataSig;
 
-                scheduleVO=dao.getScheduleByID(CalendarActivity.this,Integer.parseInt(scheduleIDs[i]));
-                Map<String, Object> map = new HashMap<String, Object>();
-                //System.out.println("------------test"+scheduleVO.getTime()+"-------"+scheduleVO.getScheduleContent());
-                map.put("id", scheduleVO.getScheduleID());
-                map.put("time", scheduleVO.getTime());
-                map.put("shec", scheduleVO.getScheduleTtile());
-                itemList.add(map);
+                    }
+                    message.setData(b);
+                }
+
+                mHandler.sendMessage(message);
+            }
+        }).start();
+
+    }
+
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg)
+        {
+            if(msg.what == dataSig)
+            {
+                itemList.clear();
+                ScheduleDAO dao = new ScheduleDAO(CalendarActivity.this);
+                for (int i = 0; i < scheduleIDs.length; i++) {
+
+                    scheduleVO = dao.getScheduleByID(CalendarActivity.this, Integer.parseInt(scheduleIDs[i]));
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    //System.out.println("------------test"+scheduleVO.getTime()+"-------"+scheduleVO.getScheduleContent());
+                    map.put("id", scheduleVO.getScheduleID());
+                    map.put("time", scheduleVO.getTime());
+                    map.put("shec", scheduleVO.getScheduleTtile());
+                    itemList.add(map);
+                }
+                mAdapter.notifyDataSetChanged();
+            }else {
+                itemList.clear();
+                mAdapter.notifyDataSetChanged();
             }
 
-            mAdapter.notifyDataSetChanged();
-
-
-        }else{
-            //判断是否有日程安排
-            HAS_SCHEDULE = false;
-            itemList.clear();
-            mAdapter.notifyDataSetChanged();
+            super.handleMessage(msg);
         }
-    }
-	
-	public void previous_year(View view) {
+    };
+
+
+    public void previous_year(View view) {
 		addGridView();   //添加一个gridView
 		jumpMonth--;     //上一个月
 		int gvFlag = 0;
@@ -230,9 +265,12 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
             //像左滑动
 			addGridView();   //添加一个gridView
 			jumpMonth++;     //下一个月
-			
-			calV = new CalendarViewAdapter(this, getResources(),jumpMonth,jumpYear,year_c,month_c,day_c);
-	        gridView.setAdapter(calV);
+			if(iScheduleDay==-1){
+                calV = new CalendarViewAdapter(this, getResources(),jumpMonth,jumpYear,year_c,month_c,day_c);
+            }else{
+                calV = new CalendarViewAdapter(this, getResources(),jumpMonth,jumpYear,year_c,month_c,iScheduleDay);
+            }
+			gridView.setAdapter(calV);
 	        //flipper.addView(gridView);
 	        addTextToTopTextView(topText);
 	        gvFlag++;
@@ -246,8 +284,11 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
             //向右滑动
 			addGridView();   //添加一个gridView
 			jumpMonth--;     //上一个月
-			
-			calV = new CalendarViewAdapter(this, getResources(),jumpMonth,jumpYear,year_c,month_c,day_c);
+            if(iScheduleDay==-1){
+                calV = new CalendarViewAdapter(this, getResources(),jumpMonth,jumpYear,year_c,month_c,day_c);
+            }else{
+                calV = new CalendarViewAdapter(this, getResources(),jumpMonth,jumpYear,year_c,month_c,iScheduleDay);
+            }
 	        gridView.setAdapter(calV);
 	        gvFlag++;
 	        addTextToTopTextView(topText);
@@ -423,7 +464,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
         int Width = display.getWidth(); 
         int Height = display.getHeight();
         
-		gridView = new GridView(this);
+		gridView = new GridViewForScrollView(this);
 		gridView.setNumColumns(7);
 		gridView.setColumnWidth(46);
 	//	gridView.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
@@ -439,7 +480,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
             //将gridview中的触摸事件回传给gestureDetector
 			
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
+//                mHandler.removeMessages(SCUSSCE,message);
 				return CalendarActivity.this.gestureDetector
 						.onTouchEvent(event);
 
@@ -490,6 +531,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 	//gridview选中效果
     public void selectedGridView(String scheduleDay,String scheduleYear,String scheduleMonth,View view,int position){
 		clickPosition = position;
+        iScheduleDay = Integer.parseInt(scheduleDay);
         if (ONCLICK_VIEW==null) {
             if (scheduleDay.equals(String.valueOf(day_c))&&scheduleMonth.equals(String.valueOf(month_c))&&scheduleYear.equals(String.valueOf(year_c))) {
                 ONCLICK_VIEW = null;
@@ -512,6 +554,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
                 ONCLICK_VIEW.findViewById(R.id.tvtext).setBackgroundResource(R.drawable.select_bg);
             }
         }
+
 		//通过日期查询这一天是否被标记，如果标记了日程就查询出这天的所有日程信息
 		getScheduleDateList(Integer.parseInt(scheduleYear), Integer.parseInt(scheduleMonth), Integer.parseInt(scheduleDay));
     }
