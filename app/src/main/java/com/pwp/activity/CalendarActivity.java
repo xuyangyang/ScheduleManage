@@ -39,6 +39,7 @@ import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 import android.widget.AbsListView.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -94,6 +95,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
     private int nodataSig = 0;
     private int dataSig = 1;
     private Message message;
+    private int lvIndext;// 标记上次滑动位置
 	public CalendarActivity() {
 
 		Date date = new Date();
@@ -128,6 +130,37 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 		itemList = new ArrayList<Map<String,Object>>();
 		mAdapter = new SimpleAdapter(this, itemList, R.layout.item_detail, new String[]{"id","time","shec"}, new int[]{R.id.tv_id,R.id.tv_time,R.id.tv_shecudul});
 		lV_schedule.setAdapter(mAdapter);
+
+        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+
+            @Override
+
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+                switch (scrollState){
+                    //滚动前，手还在屏幕上 记录滚动前的下标
+                    case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+                        lvIndext = view.getLastVisiblePosition();
+                        break;
+                    //滚动停止
+                    case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
+                        int scrolled = view.getLastVisiblePosition();
+                        if(scrolled>=lvIndext){ //下滚
+                            gridView.setNumColumns(7);
+                        }else{
+                            gridView.setNumColumns(1);
+                        }
+                        break;
+                }
+
+            }
+
+            @Override
+
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+
+            }});
 	}
 
     @Override
