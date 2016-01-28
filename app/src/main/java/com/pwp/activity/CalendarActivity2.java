@@ -1,14 +1,5 @@
 package com.pwp.activity;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.R.color;
-import android.R.integer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,38 +11,28 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
-import android.widget.AbsListView;
 import android.widget.AbsListView.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.DatePicker;
-import android.widget.FrameLayout;
 import android.widget.GridView;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
@@ -64,12 +45,19 @@ import com.pwp.view.ListViewForScrollView;
 import com.pwp.view.MyScollView;
 import com.pwp.vo.ScheduleVO;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * 日历显示activity
  *
  */
 @SuppressLint("ResourceAsColor") 
-public class CalendarActivity extends Activity implements OnGestureListener,OnItemClickListener,OnItemLongClickListener {
+public class CalendarActivity2 extends Activity implements OnGestureListener,OnItemClickListener,OnItemLongClickListener {
 
 	private ViewFlipper flipper = null;
 	private GestureDetector gestureDetector = null;
@@ -77,6 +65,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
     private MyScollView mainsrollview;
     private GridView weektitleGv;
 	private GridViewForScrollView gridView = null;
+    private CalendarView mCalendarView;
 	private BorderText topText = null;
 	private ListViewForScrollView lV_schedule;
 	List< Map<String, Object>> itemList;
@@ -102,7 +91,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
     private Message message;
     private String weekArr[] = { "日", "一", "二", "三", "四", "五", "六" };
     public boolean isPullUp;//判断gridview是否上拉
-	public CalendarActivity() {
+	public CalendarActivity2() {
 
 		Date date = new Date();
     	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d");
@@ -117,7 +106,22 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.rili);
+        setContentView(R.layout.rili);
+        mCalendarView = new CalendarView(this,-1,-1);
+        gestureDetector = new GestureDetector(this);
+        flipper = (ViewFlipper) findViewById(R.id.flipper);
+
+        topText = (BorderText) findViewById(R.id.toptext);
+        lV_schedule = (ListViewForScrollView)findViewById(R.id.lv_schedule);
+        lV_schedule.setOnItemLongClickListener(this);
+
+        flipper.removeAllViews();
+        flipper.addView(mCalendarView, 0);
+        addTextToTopTextView(topText);
+        itemList = new ArrayList<Map<String,Object>>();
+        mAdapter = new SimpleAdapter(this, itemList, R.layout.item_detail, new String[]{"id","time","shec"}, new int[]{R.id.tv_id,R.id.tv_time,R.id.tv_shecudul});
+        lV_schedule.setAdapter(mAdapter);
+		/*setContentView(R.layout.rili);
         mainsrollview = (MyScollView) findViewById(R.id.mainsrollview);
         weektitleGv = (GridView) findViewById(R.id.weektitleGv);
         ArrayList<HashMap<String, Object>> lstImageItem = new ArrayList<HashMap<String, Object>>();
@@ -150,9 +154,9 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
         addTextToTopTextView(topText);
 		itemList = new ArrayList<Map<String,Object>>();
 		mAdapter = new SimpleAdapter(this, itemList, R.layout.item_detail, new String[]{"id","time","shec"}, new int[]{R.id.tv_id,R.id.tv_time,R.id.tv_shecudul});
-		lV_schedule.setAdapter(mAdapter);
+		lV_schedule.setAdapter(mAdapter);*/
 
-        /*mainsrollview.setOnScrollListener(new AbsListView.OnScrollListener() {
+       /* mainsrollview.setOnScrollListener(new AbsListView.OnScrollListener() {
 
             @Override
 
@@ -187,7 +191,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
     @Override
     protected void onResume() {
         super.onResume();
-		initDate();
+		/*initDate();*/
 
     }
 
@@ -205,10 +209,10 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 
          if(scheduleIDs != null && scheduleIDs.length > 0){
        	  HAS_SCHEDULE = true;
-       	  ScheduleDAO dao=new ScheduleDAO(CalendarActivity.this);
+       	  ScheduleDAO dao=new ScheduleDAO(CalendarActivity2.this);
     		 for (int i = 0; i < scheduleIDs.length; i++) {
     			
-           	scheduleVO=dao.getScheduleByID(CalendarActivity.this,Integer.parseInt(scheduleIDs[i]));
+           	scheduleVO=dao.getScheduleByID(CalendarActivity2.this,Integer.parseInt(scheduleIDs[i]));
     			Map<String, Object> map = new HashMap<String, Object>();
     			//System.out.println("------------test"+scheduleVO.getTime()+"-------"+scheduleVO.getScheduleContent());
                 map.put("id", scheduleVO.getScheduleID());
@@ -257,10 +261,10 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
             if(msg.what == dataSig)
             {
                 itemList.clear();
-                ScheduleDAO dao = new ScheduleDAO(CalendarActivity.this);
+                ScheduleDAO dao = new ScheduleDAO(CalendarActivity2.this);
                 for (int i = 0; i < scheduleIDs.length; i++) {
 
-                    scheduleVO = dao.getScheduleByID(CalendarActivity.this, Integer.parseInt(scheduleIDs[i]));
+                    scheduleVO = dao.getScheduleByID(CalendarActivity2.this, Integer.parseInt(scheduleIDs[i]));
                     Map<String, Object> map = new HashMap<String, Object>();
                     //System.out.println("------------test"+scheduleVO.getTime()+"-------"+scheduleVO.getScheduleContent());
                     map.put("id", scheduleVO.getScheduleID());
@@ -426,11 +430,11 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 					//1901-1-1 ----> 2049-12-31
 					if(year < 1901 || year > 2049){
 						//不在查询范围内
-						new AlertDialog.Builder(CalendarActivity.this).setTitle("错误日期").setMessage("跳转日期范围(1901/1/1-2049/12/31)").setPositiveButton("确认", null).show();
+						new AlertDialog.Builder(CalendarActivity2.this).setTitle("错误日期").setMessage("跳转日期范围(1901/1/1-2049/12/31)").setPositiveButton("确认", null).show();
 					}else{
 						int gvFlag = 0;
 						addGridView();   //添加一个gridView
-			        	calV = new CalendarViewAdapter(CalendarActivity.this, CalendarActivity.this.getResources(),year,monthOfYear+1,dayOfMonth);
+			        	calV = new CalendarViewAdapter(CalendarActivity2.this, CalendarActivity2.this.getResources(),year,monthOfYear+1,dayOfMonth);
 				        gridView.setAdapter(calV);
 				        addTextToTopTextView(topText);
 				        gvFlag++;
@@ -439,13 +443,13 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 				        	//nothing to do
 				        }
 				        if((year == year_c && monthOfYear+1 > month_c) || year > year_c ){
-				        	CalendarActivity.this.flipper.setInAnimation(AnimationUtils.loadAnimation(CalendarActivity.this,R.anim.push_left_in));
-				        	CalendarActivity.this.flipper.setOutAnimation(AnimationUtils.loadAnimation(CalendarActivity.this,R.anim.push_left_out));
-				        	CalendarActivity.this.flipper.showNext();
+				        	CalendarActivity2.this.flipper.setInAnimation(AnimationUtils.loadAnimation(CalendarActivity2.this,R.anim.push_left_in));
+				        	CalendarActivity2.this.flipper.setOutAnimation(AnimationUtils.loadAnimation(CalendarActivity2.this,R.anim.push_left_out));
+				        	CalendarActivity2.this.flipper.showNext();
 				        }else{
-				        	CalendarActivity.this.flipper.setInAnimation(AnimationUtils.loadAnimation(CalendarActivity.this,R.anim.push_right_in));
-				        	CalendarActivity.this.flipper.setOutAnimation(AnimationUtils.loadAnimation(CalendarActivity.this,R.anim.push_right_out));
-				        	CalendarActivity.this.flipper.showPrevious();
+				        	CalendarActivity2.this.flipper.setInAnimation(AnimationUtils.loadAnimation(CalendarActivity2.this,R.anim.push_right_in));
+				        	CalendarActivity2.this.flipper.setOutAnimation(AnimationUtils.loadAnimation(CalendarActivity2.this,R.anim.push_right_out));
+				        	CalendarActivity2.this.flipper.showPrevious();
 				        }
 				        flipper.removeViewAt(0);
 				        //跳转之后将跳转之后的日期设置为当期日期
@@ -509,12 +513,6 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 		view.setBackgroundResource(R.color.white);
 		textDate.append(calV.getShowYear()).append("  年   ").append(
 				calV.getShowMonth()).append("  月").append("\t");
-		/*if (!calV.getLeapMonth().equals("") && calV.getLeapMonth() != null) {
-			textDate.append("闰").append(calV.getLeapMonth()).append("月")
-					.append("\t");
-		}
-		textDate.append(calV.getAnimalsYear()).append("年").append("(").append(
-				calV.getCyclical()).append("年)");*/
 		view.setText(textDate);
 		view.setTextColor(Color.BLACK);
 		view.setTypeface(Typeface.DEFAULT_BOLD);
@@ -547,7 +545,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
 			
 			public boolean onTouch(View v, MotionEvent event) {
 //                mHandler.removeMessages(SCUSSCE,message);
-				return CalendarActivity.this.gestureDetector
+				return CalendarActivity2.this.gestureDetector
 						.onTouchEvent(event);
 
 			}
@@ -584,7 +582,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
                     return false;
                 }
 				getDateClick(arg2);
-				Intent intent = new Intent(CalendarActivity.this, ScheduleViewActivity.class);
+				Intent intent = new Intent(CalendarActivity2.this, ScheduleViewActivity.class);
 				intent.putStringArrayListExtra("scheduleDate", scheduleDate);
 				startActivity(intent);
 				return false;
@@ -694,7 +692,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
     @Override
     public boolean onItemLongClick(AdapterView<?> adapterView,final View view, int i, long l) {
 
-        Dialog alertDialog = new AlertDialog.Builder(CalendarActivity.this).
+        Dialog alertDialog = new AlertDialog.Builder(CalendarActivity2.this).
                 setMessage("删除日程信息？").
                 setPositiveButton("确定", new DialogInterface.OnClickListener() {
 
@@ -703,7 +701,7 @@ public class CalendarActivity extends Activity implements OnGestureListener,OnIt
                         int scheduleID = Integer.parseInt(id_tv.getText().toString());
                         dao.delete(scheduleID);
                         mAdapter.notifyDataSetChanged();
-                        ScheduleViewActivity.setAlart(CalendarActivity.this);
+                        ScheduleViewActivity.setAlart(CalendarActivity2.this);
                         if(builder!=null&&builder.isShowing()){
                             builder.dismiss();
                         }

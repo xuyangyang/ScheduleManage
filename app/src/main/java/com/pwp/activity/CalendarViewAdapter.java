@@ -14,9 +14,11 @@ import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -37,9 +39,8 @@ public class CalendarViewAdapter extends BaseAdapter {
     private int daysOfMonth = 0; // 某月的天数
     private int dayOfWeek = 0; // 具体某一天是星期几
     private int lastDaysOfMonth = 0; // 上一个月的总天数
-    private Context context;
-    private String[] dayNumber = new String[49]; // 一个gridview中的日期存入此数组中
-    private static String week[] = { "日", "一", "二", "三", "四", "五", "六" };
+    private CalendarActivity act;
+    private String[] dayNumber = new String[42]; // 一个gridview中的日期存入此数组中
     private SpecialCalendar sc = null;
     private LunarCalendar lc = null;
     private Resources res = null;
@@ -64,9 +65,6 @@ public class CalendarViewAdapter extends BaseAdapter {
     private String sys_month = "";
     private String sys_day = "";
 
-
-    private View selectedGridView;
-
     public CalendarViewAdapter() {
         Date date = new Date();
         sysDate = sdf.format(date); // 当期日期
@@ -79,7 +77,7 @@ public class CalendarViewAdapter extends BaseAdapter {
     public CalendarViewAdapter(Context context, Resources rs, int jumpMonth,
                         int jumpYear, int year_c, int month_c, int day_c) {
         this();
-        this.context = context;
+        act = (CalendarActivity) context;
         sc = new SpecialCalendar();
         lc = new LunarCalendar();
         this.res = rs;
@@ -115,10 +113,48 @@ public class CalendarViewAdapter extends BaseAdapter {
 
     }
 
+    public CalendarViewAdapter(Context context, Resources rs, int jumpMonth,
+                               int jumpYear, int year_c, int month_c, int day_c,boolean isPullUp) {
+        this();
+        act = (CalendarActivity) context;
+        sc = new SpecialCalendar();
+        lc = new LunarCalendar();
+        this.res = rs;
+
+        int stepYear = year_c + jumpYear;
+        int stepMonth = month_c + jumpMonth;
+        if (stepMonth > 0) {
+            // 往下一个月滑动
+            if (stepMonth % 12 == 0) {
+                stepYear = year_c + stepMonth / 12 - 1;
+                stepMonth = 12;
+            } else {
+                stepYear = year_c + stepMonth / 12;
+                stepMonth = stepMonth % 12;
+            }
+        } else {
+            // 往上一个月滑动
+            stepYear = year_c - 1 + stepMonth / 12;
+            stepMonth = stepMonth % 12 + 12;
+            if (stepMonth % 12 == 0) {
+
+            }
+        }
+
+        currentYear = String.valueOf(stepYear);// 得到当前的年份
+        currentMonth = String.valueOf(stepMonth); // 得到本月
+        // （jumpMonth为滑动的次数，每滑动一次就增加一月或减一月）
+        currentDay = String.valueOf(day_c); // 得到当前日期是哪天
+
+        getCalendar(Integer.parseInt(currentYear),
+                Integer.parseInt(currentMonth));
+
+    }
+
     public CalendarViewAdapter(Context context, Resources rs, int year, int month,
                         int day) {
         this();
-        this.context = context;
+        act = (CalendarActivity) context;
         sc = new SpecialCalendar();
         lc = new LunarCalendar();
         this.res = rs;
@@ -154,8 +190,19 @@ public class CalendarViewAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(
+            convertView = LayoutInflater.from(act).inflate(
                     R.layout.calendar, null);
+        }
+
+        if(act.isPullUp){
+            int row = act.clickPosition/7;
+            if(row != position/7){
+                convertView.setVisibility(View.GONE);
+                convertView.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, convertView.getMeasuredHeight()/6,
+                        Gravity.CENTER));
+            }
+
+            return convertView;
         }
         TextView textView = (TextView) convertView.findViewById(R.id.tvtext);
         String d = dayNumber[position].split("\\.")[0];
@@ -177,26 +224,19 @@ public class CalendarViewAdapter extends BaseAdapter {
         // Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         textView.setText(sp);
         textView.setTextColor(Color.GRAY);
-        if (position < 7) {
-            // 设置周
-            textView.setTextSize(15);
-//            drawable = res.getDrawable(R.drawable.week_top);
-            textView.setBackgroundDrawable(drawable);
-        }
 
-        if (position < daysOfMonth + dayOfWeek + 7 && position >= dayOfWeek + 7) {
+
+        if (position < daysOfMonth + dayOfWeek && position >= dayOfWeek) {
             // 当前月信息显示
             textView.setTextColor(Color.BLACK);// 当月字体设黑
             if(d.equals(currentDay)){
-                CalendarActivity act = (CalendarActivity) context;
                 act.selectedGridView(currentDay,currentYear,currentMonth,convertView,position);
             }
         }
         if (schDateTagFlag != null && schDateTagFlag.length > 0) {
             for (int i = 0; i < schDateTagFlag.length; i++) {
                 if (schDateTagFlag[i] == position) {
-                    // 设置日程标记背景
-//                    textView.setBackgroundResource(R.drawable.mark);
+                    // 设置日程标记
                     convertView.findViewById(R.id.bluepoint).setVisibility(View.VISIBLE);
                 }
             }
@@ -229,25 +269,22 @@ public class CalendarViewAdapter extends BaseAdapter {
         String lunarDay = "";
 
         // 得到当前月的所有日程日期(这些日期需要标记)
-        dao = new ScheduleDAO(context);
+        dao = new ScheduleDAO(act);
         ArrayList<ScheduleDateTag> dateTagList = dao.getTagDate(year, month);
         if (dateTagList != null && dateTagList.size() > 0) {
             schDateTagFlag = new int[dateTagList.size()];
         }
 
         for (int i = 0; i < dayNumber.length; i++) {
-            // 周一
-            if (i < 7) {
-                dayNumber[i] = week[i] + "." + " ";
-            } else if (i < dayOfWeek + 7) { // 前一个月
-                int temp = lastDaysOfMonth - dayOfWeek + 1 - 7;
+            if (i < dayOfWeek) { // 前一个月
+                int temp = lastDaysOfMonth - dayOfWeek + 1 ;
                 lunarDay = lc.getLunarDate(year, month - 1, temp + i, false);
                 dayNumber[i] = (temp + i) + "." + lunarDay;
-            } else if (i < daysOfMonth + dayOfWeek + 7) { // 本月
-                String day = String.valueOf(i - dayOfWeek + 1 - 7); // 得到的日期
-                lunarDay = lc.getLunarDate(year, month, i - dayOfWeek + 1 - 7,
+            } else if (i < daysOfMonth + dayOfWeek) { // 本月
+                String day = String.valueOf(i - dayOfWeek + 1 ); // 得到的日期
+                lunarDay = lc.getLunarDate(year, month, i - dayOfWeek + 1 ,
                         false);
-                dayNumber[i] = i - dayOfWeek + 1 - 7 + "." + lunarDay;
+                dayNumber[i] = i - dayOfWeek + 1  + "." + lunarDay;
                 // 对于当前月才去标记当前日期
                 if (sys_year.equals(String.valueOf(year))
                         && sys_month.equals(String.valueOf(month))
@@ -309,7 +346,7 @@ public class CalendarViewAdapter extends BaseAdapter {
      * @return
      */
     public int getStartPositon() {
-        return dayOfWeek + 7;
+        return dayOfWeek ;
     }
 
     /**
@@ -318,7 +355,7 @@ public class CalendarViewAdapter extends BaseAdapter {
      * @return
      */
     public int getEndPosition() {
-        return (dayOfWeek + daysOfMonth + 7) - 1;
+        return (dayOfWeek + daysOfMonth ) - 1;
     }
 
     public String getShowYear() {
@@ -360,4 +397,5 @@ public class CalendarViewAdapter extends BaseAdapter {
     public void setCyclical(String cyclical) {
         this.cyclical = cyclical;
     }
+
 }

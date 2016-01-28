@@ -7,6 +7,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
 
+import com.pwp.activity.CalendarActivity;
+
 /**
  * Created by Administrator on 16-1-11.
  * 自定义ScrollView,与其内部左右滑动不冲突
@@ -48,6 +50,9 @@ public class MyScollView extends ScrollView {
 
             }
             if (Math.abs(distanceY) >= Math.abs(distanceX)) {
+                if(distanceY >= 0){
+                }else {
+                }
                 return true;
             }
             return false;
